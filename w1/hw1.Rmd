@@ -1,0 +1,20 @@
+---
+title: "Homework 1"
+output: html_notebook
+---
+
+#### 4.6.3
+```{r}
+X = rnorm(n = 500, mean = 3, sd = 5^0.5)
+Y = rnorm(n = 500, mean = -7, sd = 2^0.5)
+
+Z = c(5^-0.5 * (X - 3)^2, 2^-0.5 * (Y + 7)^2)
+Z = subset(Z, Z < 10)
+
+C = rchisq(n = 1000, df = 2)
+C = subset(C, C < 10)
+
+hist(Z, breaks = 100, xlim = c(0, 10), ylim = c(0, 100))
+hist(C, breaks = 100, xlim = c(0, 10), ylim = c(0, 100))
+```
+
