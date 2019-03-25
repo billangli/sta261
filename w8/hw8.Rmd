@@ -1,0 +1,180 @@
+---
+title: "Homework 8"
+output: html_notebook
+---
+
+#### Rice 11.35
+An experiment was done to measure the effects of ozone, a component of smog.
+A group of 22 seventy-day-old rats were kept in an environment containing ozone
+for 7 days, and their weight gains were recorded. Another group of 23 rats of a
+similar age were kept in an ozone-free environment for a similar time, and their
+weight gains were recorded. The data (in grams) are given below. Analyze the
+data to determine the effect of ozone. Write a summary of your conclusions.
+[This problem is from Doksum and Sievers (1976) who provide an interesting
+analysis.]
+
+```{r}
+control = c(41.0,25.9,13.1,-16.9,15.4,22.4,29.4,26.0,38.4,21.9,27.3,17.4,27.4,17.7,21.4,26.6,24.9,18.3,28.5,21.8,19.2,26.0,22.7)
+ozone = c(10.1,7.3,-9.9,17.9,6.6,39.9,-14.7,-9.0,6.1,14.3,6.8,-12.9,12.1,-15.9,44.1,20.4,15.5,28.2,14.0,15.7,54.6,-9.0)
+```
+
+Find the mean and the standard error.
+
+```{r}
+control_bar = mean(control)
+ozone_bar = mean(ozone)
+sprintf("mean of control: %s, mean of ozone : %s", control_bar, ozone_bar)
+```
+
+```{r}
+control_var = var(control)
+ozone_var = var(ozone)
+sprintf("var of control: %s, var of ozone : %s", control_bar, ozone_var)
+```
+
+Find the pooled sample variance.
+
+```{r}
+n = length(control)
+m = length(ozone)
+pooled_var = ((n - 1) * control_var + (m - 1) * ozone_var) / (n + m - 2)
+sprintf("pooled variance: %s", pooled_var)
+```
+
+Calculate the test statistic.
+
+```{r}
+test_statistic = (control_bar - ozone_bar) / sqrt(pooled_var * (1 / n + 1 / m))
+sprintf("test statistic: %s", test_statistic)
+
+p = 2 * (1 - pnorm(test_statistic))
+sprintf("p-value: %s", p)
+```
+
+Reject the null hypothesis that there is no effect.
+
+
+#### Rice 11.36
+Lin, Sutton, and Qurashi (1979) compared microbiological and hydroxylamine
+methods for the analysis of ampicillin dosages. In one series of experiments, pairs
+of tablets were analyzed by the two methods. The data in the following table give
+the percentages of claimed amount of ampicillin found by the two methods in
+several pairs of tablets. What are X − Y and s X −Y ? If the pairing had been erro-
+neously ignored and it had been assumed that the two samples were independent,
+what would have been the estimate of the standard deviation of X − Y ? Ana-
+lyze the data to determine if there is a systematic difference between the two
+methods.
+
+```{r}
+micro = c(97.2,105.8,99.5,100.0,93.8,79.2,72.0,72.0,69.5,20.5,95.2,90.8,96.2,96.2,91.0)
+hydro = c(97.2,97.8,96.2,101.8,88.0,74.0,75.0,67.5,65.8,21.2,94.8,95.8,98.0,99.0,100.2)
+```
+
+Calculate mean, sample variances and the test statistic, if the data is pair-wise.
+
+```{r}
+diff = micro - hydro
+diff_bar = mean(diff)
+diff_var = var(diff)
+test_statistic = diff_bar / sqrt(diff_var / length(diff))
+
+test_statistic
+```
+
+Calculate p-value.
+
+```{r}
+p = 2 * (1 - pnorm(test_statistic))
+p
+```
+
+Do the same calculations if it is independent.
+
+```{r}
+n = length(micro)
+pooled_var = (var(micro) + var(hydro)) / 2
+test_statistic = (mean(micro) - mean(hydro)) / sqrt(2 * pooled_var / n)
+p = 2 * (1 - pnorm(test_statistic))
+p
+```
+
+You would not reject it in either case, so there is no significant difference.
+
+#### Rice 11.37
+Stanley and Walton (1961) ran a controlled clinical trial to investigate the effect
+of the drug stelazine on chronic schizophrenics. The trials were conducted on
+chronic schizophrenics in two closed wards. In each of the wards, the patients were
+divided into two groups matched for age, length of time in the hospital, and score
+on a behavior rating sheet. One member of each pair was given stelazine, and the
+other a placebo. Only the hospital pharmacist knew which member of each pair
+received the actual drug. The following table gives the behavioral rating scores
+for the patients at the beginning of the trial and after 3 mo. High scores are good.
+
+a. For each of the wards, test whether stelazine is associated with improvement
+in the patients’ scores.
+
+Data for patients with Stelazine and placebo before and after.
+```{r}
+sb = c(2.3,2.0,1.9,3.1,2.2,2.3,2.8,1.9,1.1)
+sa = c(3.1,2.1,2.45,3.7,2.54,3.72,4.54,1.61,1.63)
+pb = c(2.4,2.2,2.1,2.9,2.2,2.4,2.7,1.9,1.3)
+pa = c(2.0,2.6,2.0,2.0,2.4,3.18,3.0,2.54,1.72)
+
+s_diff = sa - sb
+p_diff = pa - pb
+```
+
+```{r}
+n = length(s_diff)
+pooled_var = (var(s_diff) + var(p_diff)) / 2
+test_statistic = (mean(s_diff) - mean(p_diff)) / sqrt(2 * pooled_var / n)
+p = 2 * (1 - pt(test_statistic, df = 2 * n - 2))
+
+p
+```
+
+Would not reject with 95% confidence interval. Let's verify using R's built-in t-test.
+
+```{r}
+t.test(s_diff, p_diff, alternative = 'less')
+```
+
+#### Rice 11.39
+An experiment was done to test a method for reducing faults on telephone lines
+(Welch 1987). Fourteen matched pairs of areas were used. The following table
+shows the fault rates for the control areas and for the test areas:
+
+```{r}
+test = c(676,206,230,256,280,433,337,466,497,512,794,428,452,512)
+control = c(88,570,605,617,653,2913,924,286,1098,982,2346,321,615,519)
+```
+
+
+a. Plot the differences versus the control rate and summarize what you see.
+
+```{r}
+plot(test)
+points(control, pch = 5)
+legend(1, 95, legend = c('test', 'control'), col = c('red', 'blue'))
+```
+Circle is test, diamond is control.
+
+b. Calculate the mean difference, its standard deviation, and a confidence interval.
+
+```{r}
+diff = test - control
+mean = mean(diff)
+var = var(diff)
+sprintf("mean: %s, sample var: %s", mean, var)
+```
+
+```{r}
+alpha = 0.95
+t = qt((1 + alpha) / 2, df = length(diff))
+me = t * sqrt(var / length(diff))
+lower = mean - me
+upper = mean + me
+sprintf("%s confidence interval for the change is (%s, %s)", alpha, lower, upper)
+```
+
+We reject that there is not a significant difference between the new method and the control group.
