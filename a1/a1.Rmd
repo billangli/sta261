@@ -1,0 +1,130 @@
+---
+title: "Assignment"
+author: "Bill Ang Li"
+date: "`r format(Sys.time(), '%B %eth, %Y')`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+1. Suppose you have a population of size 5 [i.e. N=5]. You measure some quantity (X) and the corresponding numbers are: 21, 22, 23, 24, 25
+
+a) Calculate the population mean ($\mu$)
+```{r}
+data = c(21, 22, 23, 24, 25)
+mu = mean(data)
+mu
+```
+
+b) Calculate the population variance ($\sigma^2$) using the formula $\sigma^2 = \frac{\sum_{j=1}^{N}(X_j - \mu)^2}{N}$
+
+```{r}
+var = sum((data - mu) ^ 2) / length(data)
+var
+```
+
+2. Imagine you are taking samples (of size n = 3) from this population with replacement. Recall: “sampling WITH replacement” ensures independence.
+
+a) Write down every possible way that you could have a sample of size 3 with replacement from this population. (hint: there will 5*5*5 = 125 possible combinations)
+
+```{r}
+tbl = expand.grid(c(21:25), c(21:25), c(21:25))
+tbl
+```
+
+```{r}
+x_bar = rowMeans(tbl)
+tbl = cbind(tbl, x_bar)
+tbl
+```
+
+3. You should have noticed that the values in the “X bar” column are repetitive. For example, 21.3333333 will show up 3 times.
+
+a) Construct a frequency table based on the column “X bar”. [i.e. write down which values showed up how many times]. Now using the frequencies (also known as counts) calculate proportion of each of those repeated values. [For example: proportion of 21.3333333 will be 3/125]
+
+```{r}
+proportions = table(x_bar)
+proportions
+```
+
+b) Plot these proportions against the values and connect the points using a non-linear line. (it will look like a density plot). Does the shape of this plot look like any known distribution?
+
+```{r}
+plot(proportions, type="l")
+```
+
+It looks like a normal distribution.
+
+c) Using the table of proportions or otherwise, calculate the mean of these 125 numbers and compare it to your answer of 1(a).
+
+```{r}
+mean(x_bar)
+```
+
+It is the same as 1(a), so it shows sample mean is a good estimator of population mean.
+
+d) Using the table of proportions or otherwise, calculate the variance of these 125 numbers. Use thepopulation variance formula (i.e. divide by 125 not 124). What is the relationship of this answer to your answer of 1(b)?
+
+```{r}
+var(x_bar)
+```
+
+This is the sample variance, the relationship is $s^2 = \frac{\sigma^2}{n}$, where $n = 3$ is the sample size.
+
+e) Which theorem did you demonstrate empirically in part b, c and d?
+
+Central Limit Theorem.
+
+For each of these sample of size 3, calculate the sample variance using the following two formulas $$S^2 = \frac{1}{n - 1}\sum(X_i - \bar{X})^2$$ and $$\hat{\sigma}^2 = \frac{1}{n}\sum(X_i - \bar{X})^2$$ Assume the population variance, $\sigma^2 = 2$.
+
+a) By calculating (numerically using the 125 different values) Bias[$S^2$] and Bias[$\sigma^2$] check the unbiasedness of these two estimators.
+
+```{r}
+s_2 = ((tbl[1] - tbl[4]) ^ 2 + (tbl[2] - tbl[4]) ^ 2 + (tbl[3] - tbl[4]) ^ 2) / 2
+var_2 = ((tbl[1] - tbl[4]) ^ 2 + (tbl[2] - tbl[4]) ^ 2 + (tbl[3] - tbl[4]) ^ 2) / 3
+sprintf("Bias[s^2]: %s, Bias[var^2]: %s", sum(s_2) / 125 - 2, sum(var_2) / 125 - 2)
+```
+
+b) By calculating all three components separately check the following identity $$MSE[\hat{\sigma}^2] = var[\hat{\sigma}^2] + (Bias[\hat{\sigma}^2])^2$$
+
+```{r}
+mse = sum((var_2 - 2) ^ 2) / 125
+var = var(var_2)
+bias_squared = (sum(var_2) / 125 - 2) ^ 2
+mse - var - bias_squared
+```
+
+It is pretty much zero.
+
+5. Even though we need sample size n to be large to apply central limit theorem, but let’s apply it anyway. Suppose you know that the population variance, $\sigma^2 = 2$.
+
+a) For each of these 125 cases, calculate a 95% confidence interval and finally calculate the proportion of the intervals that includes $\mu = 23$.
+
+```{r}
+me = qnorm(0.975) * sqrt(2 / 3)
+lower = tbl[4] - me
+upper = tbl[4] + me
+sum(lower <= 23 & upper >= 23) / 125
+```
+
+b) Suppose someone observes only one of these 125 combinations (23,24,25). If that person is testing the null hypothesis $H_0: \mu = 23$, based on this observed sample calculate the p-value that the person will get using central limit theorem.
+
+```{r}
+data = c(23, 24, 25)
+test_statistic = (mean(data) - 23) / sqrt(2 /3)
+p = 2 * (1 - pnorm(test_statistic))
+p
+```
+
+c) Calculate the p-value numerically using the 125 $\bar{X}$ values that you calculated in part 2(b) (do not use CLT here).
+
+```{r}
+2 * sum(x_bar >= mean(data)) / 125
+```
+
+Quiz Questions
+```{r}
+quantile(x_bar)
+```
+
+
